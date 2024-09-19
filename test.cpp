@@ -1,28 +1,4 @@
-#ifdef __APPLE__
-#include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 
-void drawSky() {
-	glColor3f(0.53f, 0.81f, 0.92f); // Light blue color for sky
-	glBegin(GL_QUADS);
-    	glVertex2f(-1.0f, 1.0f);
-    	glVertex2f(1.0f, 1.0f);
-    	glVertex2f(1.0f, -1.0f);
-    	glVertex2f(-1.0f, -1.0f);
-	glEnd();
-}
-
-void drawBuilding() {
-	glColor3f(0.8f, 0.8f, 0.8f); // Light gray for the building
-	glBegin(GL_QUADS);
-    	glVertex2f(-0.5f, -0.5f);
-    	glVertex2f(0.5f, -0.5f);
-    	glVertex2f(0.5f, 0.5f);
-    	glVertex2f(-0.5f, 0.5f);
-	glEnd();
-}
 
 void drawWindows() {
 	glColor3f(0.1f, 0.1f, 0.3f); // Dark color for windows
@@ -113,4 +89,5 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 	return 0;
 }
+
 
