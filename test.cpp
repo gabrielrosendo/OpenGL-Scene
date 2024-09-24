@@ -4,113 +4,250 @@
 #include <GL/glut.h>
 #endif
 
-void drawSky() {
-	glColor3f(0.53f, 0.81f, 0.92f); // Light blue color for sky
+// Adjusted window size and layout for the 5x3 matrix
+const int windowRows = 5;  // 5 rows
+const int windowCols = 3;  // 3 columns
+
+// Halved dimensions for each window (width and height)
+const float windowWidth = 0.1f;
+const float windowHeight = 0.125f;
+
+// Adjusted spacing between windows
+const float windowSpacingX = 0.20f; // Adjusted for proper even spacing
+const float windowSpacingY = 0.17f;  // Vertical spacing between rows
+
+// Function to draw a window with dividers and an outline for depth
+void drawWindow(float x, float y, float width, float height) {
+	// Draw the outline to indicate depth (slightly larger than the window)
+	glLineWidth(1.0f);
+	glColor3f(0.1f, 0.1f, 0.1f); // Dark gray outline for depth
+	glBegin(GL_LINE_LOOP);
+    	glVertex2f(x - 0.005f, y + 0.005f);
+    	glVertex2f(x + width + 0.005f, y + 0.005f);
+    	glVertex2f(x + width + 0.005f, y - height - 0.005f);
+    	glVertex2f(x - 0.005f, y - height - 0.005f);
+	glEnd();
+
+	// Draw the left and right panels
 	glBegin(GL_QUADS);
+
+	// Left Panel (Darker Blue)
+	glColor3f(0.1, 0.2, 0.4); // Dark Blue
+	glVertex2f(x, y);
+	glVertex2f(x + width / 2.0f, y);
+	glVertex2f(x + width / 2.0f, y - height);
+	glVertex2f(x, y - height);
+
+	// Right Panel (Lighter Blue)
+	glColor3f(0.2, 0.4, 0.8); // Lighter Blue
+	glVertex2f(x + width / 2.0f, y);
+	glVertex2f(x + width, y);
+	glVertex2f(x + width, y - height);
+	glVertex2f(x + width / 2.0f, y - height);
+
+	glEnd();
+
+	// Draw the vertical dividers for the left and right panels with darker gray
+	glLineWidth(1.5f); // Thin dividers
+	glColor3f(0.3f, 0.3f, 0.3f); // Darker gray for dividers
+
+	glBegin(GL_LINES);
+
+	// Left Panel Dividers (4 bars)
+	for (float i = x + (width / 5.0f); i < x + width / 2.0f; i += width / 5.0f) {
+    	glVertex2f(i, y);
+    	glVertex2f(i, y - height);
+	}
+
+	// Right Panel Dividers (4 bars)
+	for (float i = x + width / 2.0f + (width / 5.0f); i < x + width; i += width / 5.0f) {
+    	glVertex2f(i, y);
+    	glVertex2f(i, y - height);
+	}
+
+	glEnd();
+}
+
+// Function to draw all windows on the building
+void drawAllWindows() {
+	// Iterate through the 4x3 matrix of windows
+	for (int row = 0; row < windowRows; ++row) {
+    	float startY = 0.60f - row * (windowHeight + windowSpacingY);  // Adjust vertical starting position
+    	for (int col = 0; col < windowCols; ++col) {
+        	float startX = -0.35f + col * (windowWidth + windowSpacingX); // Adjust for 3 windows per row
+        	drawWindow(startX, startY, windowWidth, windowHeight);
+    	}
+	}
+}
+
+
+void drawSky() {
+	glBegin(GL_QUADS);
+    	// Top-left vertex (sky blue)
+    	glColor3f(0.53f, 0.81f, 0.92f);
     	glVertex2f(-1.0f, 1.0f);
+	 
+    	// Top-right vertex (sky blue)
+    	glColor3f(0.53f, 0.81f, 0.92f);
     	glVertex2f(1.0f, 1.0f);
+	 
+    	// Bottom-right vertex (white)
+    	glColor3f(1.0f, 1.0f, 1.0f);
     	glVertex2f(1.0f, -1.0f);
+	 
+    	// Bottom-left vertex (white)
+    	glColor3f(1.0f, 1.0f, 1.0f);
     	glVertex2f(-1.0f, -1.0f);
 	glEnd();
 }
 
 void drawBuilding() {
-	glColor3f(0.8f, 0.8f, 0.8f); // Light gray for the building
+	// Draw the main building (light gray)
+	glColor3f(0.9f, 0.9f, 0.9f); // Light gray for the building
 	glBegin(GL_QUADS);
-    	glVertex2f(-0.5f, -0.5f);
-    	glVertex2f(0.5f, -0.5f);
-    	glVertex2f(0.5f, 0.5f);
-    	glVertex2f(-0.5f, 0.5f);
+    	glVertex2f(-0.6f, -1.0f);
+    	glVertex2f(0.65f, -1.0f);
+    	glVertex2f(0.65f, 0.8f);
+    	glVertex2f(-0.6f, 0.8f);
 	glEnd();
-}
 
-void drawWindows() {
-	glColor3f(0.1f, 0.1f, 0.3f); // Dark color for windows
+	// Draw the dark blue square on the building
+	glColor3f(0.1f, 0.2f, 0.4f); // Dark blue for square
+	glBegin(GL_QUADS);
+    	glVertex2f(-0.4f, 0.035f);
+    	glVertex2f(0.1f, 0.035f);
+    	glVertex2f(0.1f, -0.415f);
+    	glVertex2f(-0.4f, -0.415f);
+	glEnd();
+    
+	// Draw the lines on the building
+	glColor3f(0.8f, 0.8f, 0.8f); // Light gray for the lines (slightly darker than the building)
+    
+	// Vertical lines
+	glBegin(GL_LINES);
+    	glVertex2f(-0.45f, 0.8f);   // Top to bottom left vertical
+    	glVertex2f(-0.45f, -1.0f);
 
-	// Building dimensions
-	float building_left = -0.5f;
-	float building_right = 0.5f;
-	float building_bottom = -0.5f;
-	float building_top = 0.5f;
+    	glVertex2f(-0.2f, 0.8f);	// Top to bottom center left vertical
+    	glVertex2f(-0.2f, -1.0f);
 
-	// Margins and spacing
-	float edge_margin_x = 0.1f;
-	float edge_margin_y = 0.1f;
-	float window_spacing_x = 0.05f;
-	float window_spacing_y = 0.05f;
+    	glVertex2f(0.05f, 0.8f);	// Top to bottom center right vertical
+    	glVertex2f(0.05f, -1.0f);
 
-	int num_columns = 3;
-	int num_rows = 5;
+    	glVertex2f(0.3f, 0.8f); 	// Top to bottom right vertical
+    	glVertex2f(0.3f, -1.0f);
+	glEnd();
 
-	// Calculate total window area
-	float total_window_area_width = building_right - building_left - 2 * edge_margin_x;
-	float total_window_area_height = building_top - building_bottom - 2 * edge_margin_y;
+	// Horizontal lines
+	glBegin(GL_LINES);
+    	glVertex2f(-0.6f, 0.6f);	// Left to right top horizontal
+    	glVertex2f(0.65f, 0.6f);
 
-	// Calculate total spacing between windows
-	float total_spacing_x = (num_columns - 1) * window_spacing_x;
-	float total_spacing_y = (num_rows - 1) * window_spacing_y;
+    	glVertex2f(-0.6f, 0.4f);	// Left to right upper middle horizontal
+    	glVertex2f(0.65f, 0.4f);
 
-	// Calculate window dimensions
-	float window_width = (total_window_area_width - total_spacing_x) / num_columns;
-	float window_height = (total_window_area_height - total_spacing_y) / num_rows;
+    	glVertex2f(-0.6f, 0.2f);	// Left to right lower middle horizontal
+    	glVertex2f(0.65f, 0.2f);
 
-	// Starting positions
-	float start_x = building_left + edge_margin_x;
-	float start_y = building_bottom + edge_margin_y;
+    	glVertex2f(-0.6f, 0.0f);	// Left to right bottom horizontal
+    	glVertex2f(0.65f, 0.0f);
 
-	for (int i = 0; i < num_rows; i++) {
-    	float y = start_y + i * (window_height + window_spacing_y);
-    	for (int j = 0; j < num_columns; j++) {
-        	float x = start_x + j * (window_width + window_spacing_x);
-        	glBegin(GL_QUADS);
-            	glVertex2f(x, y);
-            	glVertex2f(x + window_width, y);
-            	glVertex2f(x + window_width, y + window_height);
-            	glVertex2f(x, y + window_height);
-        	glEnd();
-    	}
-	}
-}
+    	glVertex2f(-0.6f, -0.2f);   // Left to right bottom horizontal
+    	glVertex2f(0.65f, -0.2f);
 
-void drawScene() {
-	drawSky();
-	drawBuilding();
-	drawWindows();
-}
+    	glVertex2f(-0.6f, -0.4f);   // Left to right bottom horizontal
+    	glVertex2f(0.65f, -0.4f);
+	glEnd();
+}   
+    
 
+void drawPillars(){
+	// Dark brown color
+	glColor3f(0.20f, 0.10f, 0.05f);
+
+
+	// Left pillar (half the height of the right pillar)
+	glBegin(GL_QUADS);
+    	glVertex2f(-0.80f, -1.0f); // Bottom-left
+    	glVertex2f(-0.6f, -1.0f); // Bottom-right
+    	glVertex2f(-0.6f, 0.7f);  // Top-right (half height)
+    	glVertex2f(-0.80f, 0.7f);  // Top-left
+	glEnd();
+
+	// Right pillar (full height)
+	glBegin(GL_QUADS);
+    	glVertex2f(0.65f, -1.0f);  // Bottom-left
+    	glVertex2f(0.95f, -1.0f);  // Bottom-right
+    	glVertex2f(0.95f, 0.7f);  // Top-right
+    	glVertex2f(0.65f, 0.7f);  // Top-left
+	glEnd();
+    
+	glColor3f(0.9f, 0.9f, 0.9f);
+    
+	glBegin(GL_QUADS);
+    	glVertex2f(0.95f, -1.0f);  // Bottom-left
+    	glVertex2f(1.0f, -1.0f);  // Bottom-right
+    	glVertex2f(1.0f, 0.7f);  // Top-right
+    	glVertex2f(0.95f, 0.7f);  // Top-left
+	glEnd();
+    
+	// Draw the cover at the bottom of the building
+    	glColor3f(0.4f, 0.4f, 0.4f); // Dark gray for the cover
+    	glBegin(GL_QUADS);
+        	glVertex2f(-0.85f, -0.8f);
+        	glVertex2f(1.0f, -0.8f);
+        	glVertex2f(1.0f, -0.75f);  // Slightly above the bottom of the building
+        	glVertex2f(-0.85f, -0.75f);
+    	glEnd();
+}    
+
+
+// Display callback function
 void display() {
 	glClear(GL_COLOR_BUFFER_BIT);
-	drawScene();
-	glutSwapBuffers();
+
+	// Draw the Sky
+	drawSky();
+
+	// Draw the building (light gray background)
+	drawBuilding();
+    
+	//Draw Pillars
+	drawPillars();
+
+	// Draw all the windows in a 4x3 matrix
+	drawAllWindows();
+
+	glFlush();
 }
 
+// OpenGL initialization
 void init() {
-	glClearColor(0.53f, 0.81f, 0.92f, 1.0f); // Background color matches the sky
+	glClearColor(1.0, 1.0, 1.0, 1.0); // Background color (white)
 	glMatrixMode(GL_PROJECTION);
-	gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+	glLoadIdentity();
+	gluOrtho2D(-1.0, 1.0, -1.0, 1.0); // Set up an orthographic 2D projection
 }
 
-void reshape(int width, int height) {
-	glViewport(0, 0, width, height);
-}
-
-void timer(int value) {
-	// Placeholder for future animations
-	glutPostRedisplay();
-	glutTimerFunc(16, timer, 0); // Approximately 60 FPS
-}
-
+// Main function
 int main(int argc, char** argv) {
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB); // Use double buffering
-	glutInitWindowSize(500, 500);
-	glutInitWindowPosition(100, 100);
-	glutCreateWindow("Improved Building Visualization");
+	glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+	glutInitWindowSize(750,750);
+	glutCreateWindow("Building with Recreated Windows");
+
+	// Initialize OpenGL settings
 	init();
+
+	// Set the display callback function
 	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutTimerFunc(0, timer, 0); // Start the timer for animations
+
+	// Start the main loop
 	glutMainLoop();
 	return 0;
 }
+
+
+
+
 
