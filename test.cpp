@@ -230,49 +230,59 @@ void drawBrickWall() {
             glEnd();
         }
     }
-}
+}    
+
 
 void drawTree() {
-    // Draw the tree as a series of lines representing bushes
-    glColor3f(0.0f, 0.5f, 0.0f); // Green color for the bushes
+    // Set a dark gray color for the shadows of the branches
+    glColor3f(0.0f, 0.3f, 0.0f); // Dark green color for the bushes
+	
+    glLineWidth(2.0f); // Thin lines for branch-like shadows
 
-    glBegin(GL_LINES);
-        // Bush 1
-        glVertex2f(-0.98f, -0.95f);
-        glVertex2f(-0.96f, -0.85f);
+    // Begin drawing connected jagged lines for branch shadows
+    glBegin(GL_POINTS);
+    // Bush 1
+    glVertex2f(-0.98f, -0.95f);
+    glVertex2f(-0.97f, -0.93f);
+    glVertex2f(-0.96f, -0.91f);
+    glVertex2f(-0.95f, -0.89f);
 
-        glVertex2f(-0.96f, -0.85f);
-        glVertex2f(-0.94f, -0.92f);
+    // Bush 2
+    glVertex2f(-0.94f, -0.92f);
+    glVertex2f(-0.93f, -0.90f);
+    glVertex2f(-0.92f, -0.88f);
+    glVertex2f(-0.91f, -0.86f);
 
-        // Bush 2
-        glVertex2f(-0.84, -0.92f);
-        glVertex2f(-0.85, -0.82f);
+    // Bush 3
+    glVertex2f(-0.90f, -0.89f);
+    glVertex2f(-0.89f, -0.87f);
+    glVertex2f(-0.88f, -0.85f);
+    glVertex2f(-0.87f, -0.83f);
 
-        glVertex2f(-0.91f, -0.82f);
-        glVertex2f(-0.86, -0.90f);
+    // Bush 4
+    glVertex2f(-0.86f, -0.88f);
+    glVertex2f(-0.85f, -0.86f);
+    glVertex2f(-0.84f, -0.84f);
+    glVertex2f(-0.83f, -0.82f);
 
-        // Bush 3
-        glVertex2f(-0.82, -0.90f);
-        glVertex2f(-0.87f, -0.80f);
+    // Bush 5
+    glVertex2f(-0.82f, -0.87f);
+    glVertex2f(-0.81f, -0.85f);
+    glVertex2f(-0.80f, -0.83f);
+    glVertex2f(-0.79f, -0.81f);
 
-        glVertex2f(-0.87f, -0.80f);
-        glVertex2f(-0.85f, -0.88f);
-
-        // Bush 4
-        glVertex2f(-0.85f, -0.88f);
-        glVertex2f(-0.83f, -0.78f);
-
-        glVertex2f(-0.83f, -0.78f);
-        glVertex2f(-0.81f, -0.86f);
-
-        // Bush 5
-        glVertex2f(-0.81f, -0.86f);
-        glVertex2f(-0.79f, -0.76f);
-
-        glVertex2f(-0.79f, -0.76f);
-        glVertex2f(-0.77f, -0.84f);
-    glEnd();
+    // Additional dots for more randomness
+    glVertex2f(-0.98f, -0.90f);
+    glVertex2f(-0.97f, -0.88f);
+    glVertex2f(-0.96f, -0.86f);
+    glVertex2f(-0.95f, -0.84f);
+    glVertex2f(-0.94f, -0.82f);
+    glVertex2f(-0.93f, -0.80f);
+    glVertex2f(-0.92f, -0.78f);
+    glVertex2f(-0.91f, -0.76f);
+glEnd();
 }
+
 
 // Display callback function
 void display() {
