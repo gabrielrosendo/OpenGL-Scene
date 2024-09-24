@@ -206,15 +206,15 @@ void drawBrickWall() {
     glColor3f(0.4f, 0.2f, 0.0f);
 
     // Dimensions of the wall
-    float wall_left = -0.6f;
-    float wall_right = 0.65f;
-    float wall_bottom = -1.0f;
-    float wall_top = -0.8f;
+	float wall_left = -0.6f;
+	float wall_right = 0.65f;
+	float wall_bottom = -1.0f;
+	float wall_top = -0.8f;
 
     // Brick dimensions
-    float brick_width = 0.1f;
-    float brick_height = 0.05f;
-    float mortar_thickness = 0.01f;
+    float brick_width = 0.05f;
+    float brick_height = 0.025f;
+    float mortar_thickness = 0.005f;
 
     // Draw the bricks
     for (float y = wall_bottom; y < wall_top; y += brick_height + mortar_thickness) {
