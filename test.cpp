@@ -111,8 +111,8 @@ void drawBuilding() {
     	glVertex2f(-0.6f, 0.8f);
 	glEnd();
 
-	// Draw the dark blue square on the building
-	glColor3f(0.1f, 0.2f, 0.4f); // Dark blue for square
+	// Draw the dark grey square on the building
+		glColor3f(0.3f, 0.3f, 0.3f);
 	glBegin(GL_QUADS);
     	glVertex2f(-0.4f, 0.035f);
     	glVertex2f(0.1f, 0.035f);
@@ -162,8 +162,8 @@ void drawBuilding() {
     
 
 void drawPillars(){
-	// Dark brown color
-	glColor3f(0.20f, 0.10f, 0.05f);
+	// Dark grey color
+	glColor3f(0.3f, 0.3f, 0.3f);
 
 
 	// Left pillar (half the height of the right pillar)
@@ -199,7 +199,38 @@ void drawPillars(){
         	glVertex2f(1.0f, -0.75f);  // Slightly above the bottom of the building
         	glVertex2f(-0.85f, -0.75f);
     	glEnd();
+
 }    
+void drawBrickWall() {
+    // Set the color to brown for the bricks
+    glColor3f(0.4f, 0.2f, 0.0f);
+
+    // Dimensions of the wall
+    float wall_left = -0.6f;
+    float wall_right = 0.65f;
+    float wall_bottom = -1.0f;
+    float wall_top = -0.8f;
+
+    // Brick dimensions
+    float brick_width = 0.1f;
+    float brick_height = 0.05f;
+    float mortar_thickness = 0.01f;
+
+    // Draw the bricks
+    for (float y = wall_bottom; y < wall_top; y += brick_height + mortar_thickness) {
+        for (float x = wall_left; x < wall_right; x += brick_width + mortar_thickness) {
+            // Offset every other row for a staggered brick pattern
+            float x_offset = (int((y - wall_bottom) / (brick_height + mortar_thickness)) % 2) * (brick_width / 2);
+
+            glBegin(GL_QUADS);
+                glVertex2f(x + x_offset, y);
+                glVertex2f(x + x_offset + brick_width, y);
+                glVertex2f(x + x_offset + brick_width, y + brick_height);
+                glVertex2f(x + x_offset, y + brick_height);
+            glEnd();
+        }
+    }
+}
 
 
 // Display callback function
@@ -215,6 +246,8 @@ void display() {
 	//Draw Pillars
 	drawPillars();
 
+	drawBrickWall();
+	
 	// Draw all the windows in a 4x3 matrix
 	drawAllWindows();
 
