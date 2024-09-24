@@ -232,6 +232,47 @@ void drawBrickWall() {
     }
 }
 
+void drawTree() {
+    // Draw the tree as a series of lines representing bushes
+    glColor3f(0.0f, 0.5f, 0.0f); // Green color for the bushes
+
+    glBegin(GL_LINES);
+        // Bush 1
+        glVertex2f(-0.98f, -0.95f);
+        glVertex2f(-0.96f, -0.85f);
+
+        glVertex2f(-0.96f, -0.85f);
+        glVertex2f(-0.94f, -0.92f);
+
+        // Bush 2
+        glVertex2f(-0.84, -0.92f);
+        glVertex2f(-0.85, -0.82f);
+
+        glVertex2f(-0.91f, -0.82f);
+        glVertex2f(-0.86, -0.90f);
+
+        // Bush 3
+        glVertex2f(-0.82, -0.90f);
+        glVertex2f(-0.87f, -0.80f);
+
+        glVertex2f(-0.87f, -0.80f);
+        glVertex2f(-0.85f, -0.88f);
+
+        // Bush 4
+        glVertex2f(-0.85f, -0.88f);
+        glVertex2f(-0.83f, -0.78f);
+
+        glVertex2f(-0.83f, -0.78f);
+        glVertex2f(-0.81f, -0.86f);
+
+        // Bush 5
+        glVertex2f(-0.81f, -0.86f);
+        glVertex2f(-0.79f, -0.76f);
+
+        glVertex2f(-0.79f, -0.76f);
+        glVertex2f(-0.77f, -0.84f);
+    glEnd();
+}
 
 // Display callback function
 void display() {
@@ -250,6 +291,8 @@ void display() {
 	
 	// Draw all the windows in a 4x3 matrix
 	drawAllWindows();
+	
+	drawTree();
 
 	glFlush();
 }
