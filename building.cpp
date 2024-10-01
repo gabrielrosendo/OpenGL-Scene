@@ -237,7 +237,7 @@ void drawBrickWall() {
 
 	// Draw the bricks
 	for (float y = wall_bottom; y < wall_top; y += brick_height + mortar_thickness) {
-    	for (float x = wall_left; x < wall_right; x += brick_width + mortar_thickness) {
+    	for (float x = wall_left - brick_width; x < wall_right; x += brick_width + mortar_thickness) {
         	// Offset every other row for a staggered brick pattern
         	float x_offset = (int((y - wall_bottom) / (brick_height + mortar_thickness)) % 2) * (brick_width / 2);
 
