@@ -27,7 +27,7 @@ void drawWindow(float x, float y, float width, float height) {
     	glVertex2f(x + width + 0.005f, y - height - 0.005f);
     	glVertex2f(x - 0.005f, y - height - 0.005f);
 	glEnd();
-
+	
 	// Draw the left and right panels
 	glBegin(GL_QUADS);
 
@@ -65,6 +65,24 @@ void drawWindow(float x, float y, float width, float height) {
     	glVertex2f(i, y - height);
 	}
 
+	glEnd();
+	
+	//Draw window dividers
+	glLineWidth(1.5f);
+	glColor3f(1.0f, 1.0f, 1.0f); // Pure white
+	glBegin(GL_LINE_LOOP);
+    	glVertex2f(x + (width/2), y + 0.005f);
+    	glVertex2f(x + (width/2), y - height - 0.005f);
+	glEnd();
+	
+	// Draw the window pane (slightly larger than the window)
+	glLineWidth(1.0f);
+	glColor3f(1.0f, 1.0f, 1.0f); // Pure white
+	glBegin(GL_LINE_LOOP);
+    	glVertex2f(x - 0.0025f, y + 0.0025f);
+    	glVertex2f(x + width + 0.0025f, y + 0.0025f);
+    	glVertex2f(x + width + 0.0025f, y - height - 0.0025f);
+    	glVertex2f(x - 0.0025f, y - height - 0.0025f);
 	glEnd();
 }
 
@@ -221,35 +239,44 @@ void drawPillars(){
 }        
 
 void drawBrickWall() {
-	// Set the color to brown for the bricks
-	glColor3f(0.4f, 0.2f, 0.0f);
+    // Set the color to brown for the bricks
+    glColor3f(0.4f, 0.2f, 0.0f);
 
-	// Dimensions of the wall
-	float wall_left = -0.6f;
-	float wall_right = 0.65f;
-	float wall_bottom = -1.0f;
-	float wall_top = -0.8f;
+    // Dimensions of the wall
+    float wall_left = -0.65f;  // Extended slightly to the left
+    float wall_right = 0.65f;
+    float wall_bottom = -1.0f;
+    float wall_top = -0.8f;
 
-	// Brick dimensions
-	float brick_width = 0.05f;
-	float brick_height = 0.025f;
-	float mortar_thickness = 0.005f;
+    // Brick dimensions
+    float brick_width = 0.05f;
+    float brick_height = 0.025f;
+    float mortar_thickness = 0.005f;
 
-	// Draw the bricks
-	for (float y = wall_bottom; y < wall_top; y += brick_height + mortar_thickness) {
-    	for (float x = wall_left - brick_width; x < wall_right; x += brick_width + mortar_thickness) {
-        	// Offset every other row for a staggered brick pattern
-        	float x_offset = (int((y - wall_bottom) / (brick_height + mortar_thickness)) % 2) * (brick_width / 2);
+    // Counts Row Number
+    int count = 0;
+    
+    // Draw the bricks
+    for (float y = wall_bottom; y < wall_top; y += brick_height + mortar_thickness) {
+        // For every second row, offset the x position to stagger the bricks
+        count++;
+        bool is_offset_row = (count % 2) == 1;
+      
+        for (float x = wall_left; x < wall_right + 1; x += brick_width + mortar_thickness) {
+            // Apply the offset for the rows that need staggering
+            float x_offset = is_offset_row ? -(brick_width / 2) : 0.0f;
 
-        	glBegin(GL_QUADS);
-            	glVertex2f(x + x_offset, y);
-            	glVertex2f(x + x_offset + brick_width, y);
-            	glVertex2f(x + x_offset + brick_width, y + brick_height);
-            	glVertex2f(x + x_offset, y + brick_height);
-        	glEnd();
-    	}
+            // Draw a single brick
+            glBegin(GL_QUADS);
+                glVertex2f(x + x_offset, y);
+                glVertex2f(x + x_offset + brick_width, y);
+                glVertex2f(x + x_offset + brick_width, y + brick_height);
+                glVertex2f(x + x_offset, y + brick_height);
+            glEnd();
+        }
     }
 }
+
 
 // Display callback function
 void display() {
