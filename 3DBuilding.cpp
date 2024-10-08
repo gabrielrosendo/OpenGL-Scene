@@ -4,6 +4,8 @@
 #include <GL/glut.h>
 #endif
 
+#include <cmath> // For trigonometric functions
+
 // Adjusted window size and layout for the 5x3 matrix
 const int windowRows = 5;  // 5 rows
 const int windowCols = 3;  // 3 columns
@@ -15,6 +17,12 @@ const float windowHeight = 0.125f;
 // Adjusted spacing between windows
 const float windowSpacingX = 0.20f; // Adjusted for proper even spacing
 const float windowSpacingY = 0.17f;  // Vertical spacing between rows
+
+// Camera position and orientation
+float cameraX = 0.0f;
+float cameraY = 0.0f;
+float cameraZ = 3.0f;
+float cameraAngleY = 0.0f; // Yaw rotation angle in degrees
 
 // Function to draw a window with dividers and an outline for depth
 void drawWindow(float x, float y, float width, float height) {
@@ -427,9 +435,16 @@ void display() {
     // Reset transformations
     glLoadIdentity();
 
+    // Convert camera angle from degrees to radians for trigonometric functions
+    float rad = cameraAngleY * M_PI / 180.0f;
+
+    // Calculate the camera's direction vector
+    float dirX = sinf(rad);
+    float dirZ = -cosf(rad); // Negative because OpenGL's Z axis goes into the screen
+
     // Set the camera
-    gluLookAt(0.0f, 0.0f, 3.0f,   // Eye position
-              0.0f, 0.0f, 0.0f,   // Center position
+    gluLookAt(cameraX, cameraY, cameraZ,   // Eye position
+              cameraX + dirX, cameraY, cameraZ + dirZ,   // Center position
               0.0f, 1.0f, 0.0f);  // Up vector
 
     // Draw the Sky
@@ -450,6 +465,35 @@ void display() {
     glutSwapBuffers();
 }
 
+// Keyboard callback function for special keys (arrow keys)
+void specialKeys(int key, int x, int y) {
+    const float moveSpeed = 0.1f;    // Camera movement speed
+    const float angleSpeed = 5.0f;   // Camera rotation speed (degrees)
+
+    switch (key) {
+        case GLUT_KEY_UP:
+            // Move forward
+            cameraX += moveSpeed * sinf(cameraAngleY * M_PI / 180.0f);
+            cameraZ += moveSpeed * -cosf(cameraAngleY * M_PI / 180.0f);
+            break;
+        case GLUT_KEY_DOWN:
+            // Move backward
+            cameraX -= moveSpeed * sinf(cameraAngleY * M_PI / 180.0f);
+            cameraZ -= moveSpeed * -cosf(cameraAngleY * M_PI / 180.0f);
+            break;
+        case GLUT_KEY_LEFT:
+            // Rotate left
+            cameraAngleY -= angleSpeed;
+            break;
+        case GLUT_KEY_RIGHT:
+            // Rotate right
+            cameraAngleY += angleSpeed;
+            break;
+    }
+
+    glutPostRedisplay(); // Request display update
+}
+
 // OpenGL initialization
 void init() {
     glClearColor(1.0, 1.0, 1.0, 1.0); // Background color (white)
@@ -468,13 +512,16 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(750, 750);
-    glutCreateWindow("3D Building with Recreated Windows");
+    glutCreateWindow("3D Building with Camera Movement");
 
     // Initialize OpenGL settings
     init();
 
     // Set the display callback function
     glutDisplayFunc(display);
+
+    // Register the keyboard callback function for special keys
+    glutSpecialFunc(specialKeys);
 
     // Start the main loop
     glutMainLoop();
