@@ -438,6 +438,66 @@ void drawPillars() {
     }
 }
 
+void drawFloor() {
+    float floorSize = 10.0f; // Size of the floor (adjust as needed)
+    float tileSize = 0.5f;   // Size of each tile (adjust as needed)
+
+    glEnable(GL_DEPTH_TEST);
+    glBegin(GL_QUADS);
+    for (float x = -floorSize; x < floorSize; x += tileSize) {
+        for (float z = -floorSize; z < floorSize; z += tileSize) {
+            // Set the color to dark gray for pavement
+            glColor3f(0.3f, 0.3f, 0.3f); // Dark gray
+
+            glVertex3f(x, -1.0f, z);
+            glVertex3f(x + tileSize, -1.0f, z);
+            glVertex3f(x + tileSize, -1.0f, z + tileSize);
+            glVertex3f(x, -1.0f, z + tileSize);
+        }
+    }
+    glEnd();
+}
+void drawCylinder(float radius, float height, int slices) {
+    GLUquadricObj *quadObj = gluNewQuadric();
+    gluQuadricDrawStyle(quadObj, GLU_FILL);
+    gluCylinder(quadObj, radius, radius, height, slices, 1);
+    gluDeleteQuadric(quadObj);
+}
+
+void drawCone(float radius, float height, int slices) {
+    GLUquadricObj *quadObj = gluNewQuadric();
+    gluQuadricDrawStyle(quadObj, GLU_FILL);
+    gluCylinder(quadObj, radius, 0, height, slices, 1);
+    gluDeleteQuadric(quadObj);
+}
+
+void drawTree() {
+    // Position the tree to the left of the building
+    glPushMatrix();
+    glTranslatef(-1.2f, -1.0f, 0.0f);  
+
+    // Draw the trunk
+    glColor3f(0.55f, 0.27f, 0.07f);  // Brown color
+    glPushMatrix();
+    glRotatef(-90, 1.0f, 0.0f, 0.0f);  // Rotate to make the cylinder vertical
+    drawCylinder(0.05f, 0.6f, 10);  // Doubled size
+    glPopMatrix();
+
+    // Draw the foliage (three cones of different sizes)
+    glColor3f(0.0f, 0.5f, 0.0f);  // Green color
+    glPushMatrix();
+    glTranslatef(0.0f, 0.3f, 0.0f);  // Adjusted to match the height of the trunk
+    glRotatef(-90, 1.0f, 0.0f, 0.0f);  // Rotate to make the cones vertical
+    drawCone(0.15f, 0.3f, 10);  // Doubled size
+    glTranslatef(0.0f, 0.0f, 0.25f);  // Adjusted to match the new size
+    drawCone(0.2f, 0.4f, 10);  // Doubled size
+    glTranslatef(0.0f, 0.0f, 0.2f);  // Adjusted to match the new size
+    glPopMatrix();
+
+    glPopMatrix();
+}
+
+
 void drawBrickWall() {
     // Set the color to brown for the bricks
     glColor3f(0.4f, 0.2f, 0.0f);
@@ -501,6 +561,12 @@ void display() {
 
     // Draw Pillars
     drawPillars();
+
+    // Draw Floor
+    drawFloor();
+
+    // Draw Trees
+    drawTree();
 
     // Draw the building (light gray background)
     drawBuilding();
