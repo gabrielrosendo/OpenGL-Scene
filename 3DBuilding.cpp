@@ -474,6 +474,27 @@ void drawBrickWall() {
         }
     }
 }
+void drawFloor() {
+    float floorSize = 10.0f; // Size of the floor (adjust as needed)
+    float tileSize = 0.5f;   // Size of each tile (adjust as needed)
+
+    glEnable(GL_DEPTH_TEST);
+    glBegin(GL_QUADS);
+    for (float x = -floorSize; x < floorSize; x += tileSize) {
+        for (float z = -floorSize; z < floorSize; z += tileSize) {
+            // Set the color to dark gray for pavement
+            glColor3f(0.3f, 0.3f, 0.3f); // Dark gray
+
+            glVertex3f(x, -1.0f, z);
+            glVertex3f(x + tileSize, -1.0f, z);
+            glVertex3f(x + tileSize, -1.0f, z + tileSize);
+            glVertex3f(x, -1.0f, z + tileSize);
+        }
+    }
+    glEnd();
+}
+
+
 
 // Display callback function
 void display() {
@@ -496,6 +517,10 @@ void display() {
 
     // Draw the Sky
     drawSky();
+
+    // Draw Floor
+    drawFloor();
+
 
     // Draw Brick Wall
     drawBrickWall();
