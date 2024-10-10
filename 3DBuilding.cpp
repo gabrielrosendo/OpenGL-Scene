@@ -109,24 +109,71 @@ void drawAllWindows() {
 }
 
 void drawSky() {
+    // Set sky colors
+    float skyTopColor[3] = {0.53f, 0.81f, 0.92f}; // Sky blue
+    float skyBottomColor[3] = {1.0f, 1.0f, 1.0f}; // White near the horizon
+
+    float size = 50.0f; // Size of the skybox (large enough to enclose the entire scene)
+
+    // Draw the top face (sky blue)
     glBegin(GL_QUADS);
-        // Top-left vertex (sky blue)
-        glColor3f(0.53f, 0.81f, 0.92f);
-        glVertex3f(-10.0f, 10.0f, -10.0f);
+        glColor3fv(skyTopColor);
+        glVertex3f(-size, size, -size);
+        glVertex3f(size, size, -size);
+        glVertex3f(size, size, size);
+        glVertex3f(-size, size, size);
+    glEnd();
 
-        // Top-right vertex (sky blue)
-        glColor3f(0.53f, 0.81f, 0.92f);
-        glVertex3f(10.0f, 10.0f, -10.0f);
+    // Draw the bottom face (white)
+    glBegin(GL_QUADS);
+        glColor3fv(skyBottomColor);
+        glVertex3f(-size, -size, -size);
+        glVertex3f(size, -size, -size);
+        glVertex3f(size, -size, size);
+        glVertex3f(-size, -size, size);
+    glEnd();
 
-        // Bottom-right vertex (white)
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glVertex3f(10.0f, -10.0f, -10.0f);
+    // Draw the front face
+    glBegin(GL_QUADS);
+        glColor3fv(skyBottomColor);
+        glVertex3f(-size, -size, -size);
+        glVertex3f(size, -size, -size);
+        glColor3fv(skyTopColor);
+        glVertex3f(size, size, -size);
+        glVertex3f(-size, size, -size);
+    glEnd();
 
-        // Bottom-left vertex (white)
-        glColor3f(1.0f, 1.0f, 1.0f);
-        glVertex3f(-10.0f, -10.0f, -10.0f);
+    // Draw the back face
+    glBegin(GL_QUADS);
+        glColor3fv(skyBottomColor);
+        glVertex3f(-size, -size, size);
+        glVertex3f(size, -size, size);
+        glColor3fv(skyTopColor);
+        glVertex3f(size, size, size);
+        glVertex3f(-size, size, size);
+    glEnd();
+
+    // Draw the left face
+    glBegin(GL_QUADS);
+        glColor3fv(skyBottomColor);
+        glVertex3f(-size, -size, -size);
+        glVertex3f(-size, -size, size);
+        glColor3fv(skyTopColor);
+        glVertex3f(-size, size, size);
+        glVertex3f(-size, size, -size);
+    glEnd();
+
+    // Draw the right face
+    glBegin(GL_QUADS);
+        glColor3fv(skyBottomColor);
+        glVertex3f(size, -size, -size);
+        glVertex3f(size, -size, size);
+        glColor3fv(skyTopColor);
+        glVertex3f(size, size, size);
+        glVertex3f(size, size, -size);
     glEnd();
 }
+
 
 void drawBuilding() {
     // Dimensions
