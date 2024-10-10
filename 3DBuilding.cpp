@@ -443,8 +443,8 @@ void drawBrickWall() {
     glColor3f(0.4f, 0.2f, 0.0f);
 
     // Dimensions of the wall
-    float wall_left = -0.8f;  // Align with the left pillar
-    float wall_right = 0.95f; // Align with the right pillar
+    float wall_left = -0.75f;
+    float wall_right = -0.1f;
     float wall_bottom = -1.0f;
     float wall_top = -0.8f;
     float z = -0.05f; // Slightly behind the building front face
@@ -461,7 +461,7 @@ void drawBrickWall() {
         count++;
         bool is_offset_row = (count % 2) == 1;
 
-        for (float x = wall_left; x < wall_right; x += brick_width + mortar_thickness) {
+        for (float x = wall_left; x < wall_right + 1; x += brick_width + mortar_thickness) {
             float x_offset = is_offset_row ? -(brick_width / 2) : 0.0f;
 
             // Draw a single brick
@@ -474,6 +474,7 @@ void drawBrickWall() {
         }
     }
 }
+
 // Display callback function
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
