@@ -5,6 +5,9 @@
 #endif
 
 #include <cmath> // For trigonometric functions
+#include <iostream> 
+#include "getBMP.h"
+
 
 // Adjusted window size and layout for the 5x3 matrix
 const int windowRows = 5;  // 5 rows
@@ -24,6 +27,42 @@ float cameraY = 0.0f;
 float cameraZ = 3.0f;
 float cameraAngleY = 0.0f; // Yaw rotation angle in degrees
 
+
+unsigned int texture[1]; // Array of texture indices.
+
+void loadExternalTextures()
+{
+    std::cout << "Loading texture..." << std::endl;
+    try {
+        imageFile *image = getBMP("tree-cropped.bmp");
+        if (!image) {
+            throw std::runtime_error("Failed to load BMP file: trees.bmp");
+        }
+
+
+        // Generate texture ID
+        glGenTextures(1, texture);
+        glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+        // Load texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        std::cout << "Texture loaded." << std::endl;
+
+        // Clean up
+        delete[] image->data;
+        delete image;
+    } catch (const std::exception &e) {
+        std::cerr << "Exception during getBMP: " << e.what() << std::endl;
+        throw; // Re-throw the exception to be caught in setup
+    }
+}
 // Function to draw a window with dividers and an outline for depth
 void drawWindow(float x, float y, float width, float height) {
     float z = 0.01f; // Slightly in front of the building front face to avoid z-fighting
@@ -437,7 +476,7 @@ void drawPillars() {
         drawWindow(startX, startY, windowWidth, windowHeight);
     }
 }
-
+/*
 void drawCylinder(float radius, float height, int slices) {
     GLUquadricObj *quadObj = gluNewQuadric();
     gluQuadricDrawStyle(quadObj, GLU_FILL);
@@ -478,7 +517,7 @@ void drawTree() {
 
     glPopMatrix();
 }
-
+*/
 void drawBrickWall() {
     // Set the color to brown for the bricks
     glColor3f(0.4f, 0.2f, 0.0f);
@@ -534,6 +573,20 @@ void drawFloor() {
     }
     glEnd();
 }
+void drawTexturedTree()
+{
+    // Draw the textured tree to the left of the building
+    glPushMatrix();
+    glTranslatef(-1.2f, -1.0f, 0.0f);  // Adjust the position as needed
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-0.25f, 0.0f, 0.0f);  // Scale down by half
+    glTexCoord2f(1.0, 0.0); glVertex3f(0.25f, 0.0f, 0.0f);   // Scale down by half
+    glTexCoord2f(1.0, 1.0); glVertex3f(0.25f, 0.5f, 0.0f);   // Scale down by half
+    glTexCoord2f(0.0, 1.0); glVertex3f(-0.25f, 0.5f, 0.0f);  // Scale down by half
+    glEnd();
+    glPopMatrix();
+}
 
 // Display callback function
 void display() {
@@ -567,13 +620,16 @@ void display() {
     drawFloor();
 
     // Draw Trees
-    drawTree();
+    //drawTree();
 
     // Draw the building (light gray background)
     drawBuilding();
 
     // Draw all the windows in a 5x3 matrix
     drawAllWindows();
+    // Draw the textured tree to the left of the building
+    drawTexturedTree();
+
 
     glutSwapBuffers();
 }
@@ -620,8 +676,13 @@ void init() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-}
 
+    // Load textures
+    loadExternalTextures();
+
+    // Enable texturing
+    glEnable(GL_TEXTURE_2D);
+}
 // Main function
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
