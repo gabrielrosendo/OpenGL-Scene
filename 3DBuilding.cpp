@@ -1,13 +1,15 @@
+#define GL_SILENCE_DEPRECATION
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
 
-#include <cmath> // For trigonometric functions
 #include <iostream> 
 #include "getBMP.h"
 
+
+#include <cmath> // For trigonometric functions
 
 // Adjusted window size and layout for the 5x3 matrix
 const int windowRows = 5;  // 5 rows
@@ -27,42 +29,9 @@ float cameraY = 0.0f;
 float cameraZ = 3.0f;
 float cameraAngleY = 0.0f; // Yaw rotation angle in degrees
 
-
 unsigned int texture[1]; // Array of texture indices.
 
-void loadExternalTextures()
-{
-    std::cout << "Loading texture..." << std::endl;
-    try {
-        imageFile *image = getBMP("tree-cropped.bmp");
-        if (!image) {
-            throw std::runtime_error("Failed to load BMP file: trees.bmp");
-        }
 
-
-        // Generate texture ID
-        glGenTextures(1, texture);
-        glBindTexture(GL_TEXTURE_2D, texture[0]);
-
-        // Load texture data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
-
-        // Set texture parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        std::cout << "Texture loaded." << std::endl;
-
-        // Clean up
-        delete[] image->data;
-        delete image;
-    } catch (const std::exception &e) {
-        std::cerr << "Exception during getBMP: " << e.what() << std::endl;
-        throw; // Re-throw the exception to be caught in setup
-    }
-}
 // Function to draw a window with dividers and an outline for depth
 void drawWindow(float x, float y, float width, float height) {
     float z = 0.01f; // Slightly in front of the building front face to avoid z-fighting
@@ -327,13 +296,13 @@ void drawBuilding() {
 }
 
 void drawPillars() {
-    float front = 0.0f;
-    float back = -0.1f;
+    float front = -0.1f;
+    float back = -0.2f;
 
-    // Dark brown color
+    // Dark brown color for the pillars
     glColor3f(0.20f, 0.10f, 0.05f);
 
-    // Left pillar (half the height of the right pillar)
+    // Left pillar (adjusted to match the building's back on the z-plane)
     glBegin(GL_QUADS);
         // Front face
         glVertex3f(-0.80f, -1.0f, front);
@@ -372,99 +341,99 @@ void drawPillars() {
         glVertex3f(-0.80f, -1.0f, front);
     glEnd();
 
-    // Right pillar (full height)
+    // Right pillar (adjusted to match the building's back on the z-plane)
+    glBegin(GL_QUADS);
+	    // Front face (extended to the right)
+	    glVertex3f(0.65f, -1.0f, front);
+	    glVertex3f(1.0f, -1.0f, front);  // Extended this vertex to x = 1.0f
+	    glVertex3f(1.0f, 0.7f, front);   // Extended this vertex to x = 1.0f
+	    glVertex3f(0.65f, 0.7f, front);
+
+	    // Back face (extended to the right)
+	    glVertex3f(0.65f, -1.0f, back);
+	    glVertex3f(1.0f, -1.0f, back);   // Extended this vertex to x = 1.0f
+	    glVertex3f(1.0f, 0.7f, back);    // Extended this vertex to x = 1.0f
+	    glVertex3f(0.65f, 0.7f, back);
+
+	    // Left face (unchanged)
+	    glVertex3f(0.65f, -1.0f, back);
+	    glVertex3f(0.65f, -1.0f, front);
+	    glVertex3f(0.65f, 0.7f, front);
+	    glVertex3f(0.65f, 0.7f, back);
+
+	    // Right face (extended to cover the second block's position)
+	    glVertex3f(1.0f, -1.0f, front);  // Now at x = 1.0f
+	    glVertex3f(1.0f, -1.0f, back);   // Now at x = 1.0f
+	    glVertex3f(1.0f, 0.7f, back);    // Now at x = 1.0f
+	    glVertex3f(1.0f, 0.7f, front);   // Now at x = 1.0f
+
+	    // Top face (extended to the right)
+	    glVertex3f(0.65f, 0.7f, front);
+	    glVertex3f(1.0f, 0.7f, front);   // Extended this vertex to x = 1.0f
+	    glVertex3f(1.0f, 0.7f, back);    // Extended this vertex to x = 1.0f
+	    glVertex3f(0.65f, 0.7f, back);
+
+	    // Bottom face (extended to the right)
+	    glVertex3f(0.65f, -1.0f, back);
+	    glVertex3f(1.0f, -1.0f, back);   // Extended this vertex to x = 1.0f
+	    glVertex3f(1.0f, -1.0f, front);  // Extended this vertex to x = 1.0f
+	    glVertex3f(0.65f, -1.0f, front);
+    glEnd();
+
+
+    // Draw the cover (dark gray divider) at the bottom of the building as a 3D object
+    glColor3f(0.4f, 0.4f, 0.4f); // Dark gray for the divider
+    float dividerFront = 0.03f;  // Sticks out a bit in the front
+    float dividerBack = -0.2f;   // Matches the back of the pillars
+    float dividerTop = -0.75f;
+    float dividerBottom = -0.8f;
+    
+    //Draw the cover for the building
     glBegin(GL_QUADS);
         // Front face
-        glVertex3f(0.65f, -1.0f, front);
-        glVertex3f(0.95f, -1.0f, front);
-        glVertex3f(0.95f, 0.7f, front);
-        glVertex3f(0.65f, 0.7f, front);
+        glVertex3f(-0.85f, dividerBottom, dividerFront);
+        glVertex3f(1.0f, dividerBottom, dividerFront);
+        glVertex3f(1.0f, dividerTop, dividerFront);
+        glVertex3f(-0.85f, dividerTop, dividerFront);
 
         // Back face
-        glVertex3f(0.65f, -1.0f, back);
-        glVertex3f(0.95f, -1.0f, back);
-        glVertex3f(0.95f, 0.7f, back);
-        glVertex3f(0.65f, 0.7f, back);
+        glVertex3f(-0.85f, dividerBottom, dividerBack);
+        glVertex3f(1.0f, dividerBottom, dividerBack);
+        glVertex3f(1.0f, dividerTop, dividerBack);
+        glVertex3f(-0.85f, dividerTop, dividerBack);
 
         // Left face
-        glVertex3f(0.65f, -1.0f, back);
-        glVertex3f(0.65f, -1.0f, front);
-        glVertex3f(0.65f, 0.7f, front);
-        glVertex3f(0.65f, 0.7f, back);
+        glVertex3f(-0.85f, dividerBottom, dividerBack);
+        glVertex3f(-0.85f, dividerBottom, dividerFront);
+        glVertex3f(-0.85f, dividerTop, dividerFront);
+        glVertex3f(-0.85f, dividerTop, dividerBack);
 
         // Right face
-        glVertex3f(0.95f, -1.0f, front);
-        glVertex3f(0.95f, -1.0f, back);
-        glVertex3f(0.95f, 0.7f, back);
-        glVertex3f(0.95f, 0.7f, front);
+        glVertex3f(1.0f, dividerBottom, dividerFront);
+        glVertex3f(1.0f, dividerBottom, dividerBack);
+        glVertex3f(1.0f, dividerTop, dividerBack);
+        glVertex3f(1.0f, dividerTop, dividerFront);
 
         // Top face
-        glVertex3f(0.65f, 0.7f, front);
-        glVertex3f(0.95f, 0.7f, front);
-        glVertex3f(0.95f, 0.7f, back);
-        glVertex3f(0.65f, 0.7f, back);
+        glVertex3f(-0.85f, dividerTop, dividerFront);
+        glVertex3f(1.0f, dividerTop, dividerFront);
+        glVertex3f(1.0f, dividerTop, dividerBack);
+        glVertex3f(-0.85f, dividerTop, dividerBack);
 
         // Bottom face
-        glVertex3f(0.65f, -1.0f, back);
-        glVertex3f(0.95f, -1.0f, back);
-        glVertex3f(0.95f, -1.0f, front);
-        glVertex3f(0.65f, -1.0f, front);
+        glVertex3f(-0.85f, dividerBottom, dividerBack);
+        glVertex3f(1.0f, dividerBottom, dividerBack);
+        glVertex3f(1.0f, dividerBottom, dividerFront);
+        glVertex3f(-0.85f, dividerBottom, dividerFront);
     glEnd();
 
-    // Right side extension (light gray)
-    glColor3f(0.9f, 0.9f, 0.9f);
-    glBegin(GL_QUADS);
-        // Front face
-        glVertex3f(0.95f, -1.0f, front);
-        glVertex3f(1.0f, -1.0f, front);
-        glVertex3f(1.0f, 0.7f, front);
-        glVertex3f(0.95f, 0.7f, front);
 
-        // Back face
-        glVertex3f(0.95f, -1.0f, back);
-        glVertex3f(1.0f, -1.0f, back);
-        glVertex3f(1.0f, 0.7f, back);
-        glVertex3f(0.95f, 0.7f, back);
-
-        // Left face
-        glVertex3f(0.95f, -1.0f, back);
-        glVertex3f(0.95f, -1.0f, front);
-        glVertex3f(0.95f, 0.7f, front);
-        glVertex3f(0.95f, 0.7f, back);
-
-        // Right face
-        glVertex3f(1.0f, -1.0f, front);
-        glVertex3f(1.0f, -1.0f, back);
-        glVertex3f(1.0f, 0.7f, back);
-        glVertex3f(1.0f, 0.7f, front);
-
-        // Top face
-        glVertex3f(0.95f, 0.7f, front);
-        glVertex3f(1.0f, 0.7f, front);
-        glVertex3f(1.0f, 0.7f, back);
-        glVertex3f(0.95f, 0.7f, back);
-
-        // Bottom face
-        glVertex3f(0.95f, -1.0f, back);
-        glVertex3f(1.0f, -1.0f, back);
-        glVertex3f(1.0f, -1.0f, front);
-        glVertex3f(0.95f, -1.0f, front);
-    glEnd();
-
-    // Draw the cover at the bottom of the building
-    glColor3f(0.4f, 0.4f, 0.4f); // Dark gray for the cover
-    glBegin(GL_QUADS);
-        glVertex3f(-0.85f, -0.8f, front + 0.001f);
-        glVertex3f(1.0f, -0.8f, front + 0.001f);
-        glVertex3f(1.0f, -0.75f, front + 0.001f);
-        glVertex3f(-0.85f, -0.75f, front + 0.001f);
-    glEnd();
 
     // Draw windows on the right pillar
     for (int row = 0; row < windowRows; ++row) {
         float startY = 0.60f - row * (windowHeight + windowSpacingY);
         for (int col = 0; col < 2; ++col) {
-            float startX = 0.6f + col * (windowWidth + 0.1f);
+            float startX = 0.68f + col * (windowWidth + 0.05);
             drawWindow(startX, startY, windowWidth, windowHeight);
         }
     }
@@ -472,52 +441,11 @@ void drawPillars() {
     // Draw windows on the left pillar
     for (int row = 0; row < windowRows; ++row) {
         float startY = 0.60f - row * (windowHeight + windowSpacingY);
-        float startX = -0.7f;
+        float startX = -0.75f;
         drawWindow(startX, startY, windowWidth, windowHeight);
     }
 }
-/*
-void drawCylinder(float radius, float height, int slices) {
-    GLUquadricObj *quadObj = gluNewQuadric();
-    gluQuadricDrawStyle(quadObj, GLU_FILL);
-    gluCylinder(quadObj, radius, radius, height, slices, 1);
-    gluDeleteQuadric(quadObj);
-}
 
-
-void drawCone(float radius, float height, int slices) {
-    GLUquadricObj *quadObj = gluNewQuadric();
-    gluQuadricDrawStyle(quadObj, GLU_FILL);
-    gluCylinder(quadObj, radius, 0, height, slices, 1);
-    gluDeleteQuadric(quadObj);
-}
-
-void drawTree() {
-    // Position the tree to the left of the building
-    glPushMatrix();
-    glTranslatef(-1.2f, -1.0f, 0.0f);  
-
-    // Draw the trunk
-    glColor3f(0.55f, 0.27f, 0.07f);  // Brown color
-    glPushMatrix();
-    glRotatef(-90, 1.0f, 0.0f, 0.0f);  // Rotate to make the cylinder vertical
-    drawCylinder(0.05f, 0.6f, 10);  // Doubled size
-    glPopMatrix();
-
-    // Draw the foliage (three cones of different sizes)
-    glColor3f(0.0f, 0.5f, 0.0f);  // Green color
-    glPushMatrix();
-    glTranslatef(0.0f, 0.3f, 0.0f);  // Adjusted to match the height of the trunk
-    glRotatef(-90, 1.0f, 0.0f, 0.0f);  // Rotate to make the cones vertical
-    drawCone(0.15f, 0.3f, 10);  // Doubled size
-    glTranslatef(0.0f, 0.0f, 0.25f);  // Adjusted to match the new size
-    drawCone(0.2f, 0.4f, 10);  // Doubled size
-    glTranslatef(0.0f, 0.0f, 0.2f);  // Adjusted to match the new size
-    glPopMatrix();
-
-    glPopMatrix();
-}
-*/
 void drawBrickWall() {
     // Set the color to brown for the bricks
     glColor3f(0.4f, 0.2f, 0.0f);
@@ -527,7 +455,8 @@ void drawBrickWall() {
     float wall_right = -0.1f;
     float wall_bottom = -1.0f;
     float wall_top = -0.8f;
-    float z = -0.05f; // Slightly behind the building front face
+    float front = -0.11f;
+    float back = -0.13f;
 
     // Brick dimensions
     float brick_width = 0.05f;
@@ -536,7 +465,7 @@ void drawBrickWall() {
 
     int count = 0;
 
-    // Draw the bricks
+    // Draw the bricks as 3D objects extending from front to back
     for (float y = wall_bottom; y < wall_top; y += brick_height + mortar_thickness) {
         count++;
         bool is_offset_row = (count % 2) == 1;
@@ -544,16 +473,109 @@ void drawBrickWall() {
         for (float x = wall_left; x < wall_right + 1; x += brick_width + mortar_thickness) {
             float x_offset = is_offset_row ? -(brick_width / 2) : 0.0f;
 
-            // Draw a single brick
+            // Draw a single brick as a 3D block
             glBegin(GL_QUADS);
-                glVertex3f(x + x_offset, y, z);
-                glVertex3f(x + x_offset + brick_width, y, z);
-                glVertex3f(x + x_offset + brick_width, y + brick_height, z);
-                glVertex3f(x + x_offset, y + brick_height, z);
+                // Front face
+                glVertex3f(x + x_offset, y, front);
+                glVertex3f(x + x_offset + brick_width, y, front);
+                glVertex3f(x + x_offset + brick_width, y + brick_height, front);
+                glVertex3f(x + x_offset, y + brick_height, front);
+
+                // Back face
+                glVertex3f(x + x_offset, y, back);
+                glVertex3f(x + x_offset + brick_width, y, back);
+                glVertex3f(x + x_offset + brick_width, y + brick_height, back);
+                glVertex3f(x + x_offset, y + brick_height, back);
+
+                // Left face
+                glVertex3f(x + x_offset, y, back);
+                glVertex3f(x + x_offset, y, front);
+                glVertex3f(x + x_offset, y + brick_height, front);
+                glVertex3f(x + x_offset, y + brick_height, back);
+
+                // Right face
+                glVertex3f(x + x_offset + brick_width, y, front);
+                glVertex3f(x + x_offset + brick_width, y, back);
+                glVertex3f(x + x_offset + brick_width, y + brick_height, back);
+                glVertex3f(x + x_offset + brick_width, y + brick_height, front);
+
+                // Top face
+                glVertex3f(x + x_offset, y + brick_height, front);
+                glVertex3f(x + x_offset + brick_width, y + brick_height, front);
+                glVertex3f(x + x_offset + brick_width, y + brick_height, back);
+                glVertex3f(x + x_offset, y + brick_height, back);
+
+                // Bottom face
+                glVertex3f(x + x_offset, y, back);
+                glVertex3f(x + x_offset + brick_width, y, back);
+                glVertex3f(x + x_offset + brick_width, y, front);
+                glVertex3f(x + x_offset, y, front);
             glEnd();
         }
     }
+
+    // Draw a single 2D mortar plane at z = 0, covering the entire brick wall
+    glColor3f(0.7f, 0.7f, 0.7f); // Light gray color for the mortar plane
+    glBegin(GL_QUADS);
+        // Mortar plane covering the brick wall
+        glVertex3f(wall_left, wall_bottom, -0.12f); // bottom-left
+        glVertex3f(wall_right + 1.0f , wall_bottom, -0.12f); // bottom-right
+        glVertex3f(wall_right + 1.0f, wall_top, -0.12f); // top-right
+        glVertex3f(wall_left, wall_top, -0.12f); // top-left
+    glEnd();
 }
+
+void drawTexturedTree()
+{
+    // Draw the textured tree to the left of the building
+    glPushMatrix();
+    glTranslatef(-1.2f, -1.0f, 0.0f);  // Adjust the position as needed
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    glBegin(GL_QUADS);
+    glTexCoord2f(0.0, 0.0); glVertex3f(-0.25f, 0.0f, 0.0f);  // Scale down by half
+    glTexCoord2f(1.0, 0.0); glVertex3f(0.25f, 0.0f, 0.0f);   // Scale down by half
+    glTexCoord2f(1.0, 1.0); glVertex3f(0.25f, 0.5f, 0.0f);   // Scale down by half
+    glTexCoord2f(0.0, 1.0); glVertex3f(-0.25f, 0.5f, 0.0f);  // Scale down by half
+    glEnd();
+    glPopMatrix();
+}
+
+void loadExternalTextures()
+{
+    std::cout << "Loading texture..." << std::endl;
+    try {
+        imageFile *image = getBMP("tree-cropped.bmp");
+        if (!image) {
+            throw std::runtime_error("Failed to load BMP file: trees.bmp");
+        }
+
+
+        // Generate texture ID
+        glGenTextures(1, texture);
+        glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+        // Load texture data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
+
+        // Set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        std::cout << "Texture loaded." << std::endl;
+
+        // Clean up
+        delete[] image->data;
+        delete image;
+    } catch (const std::exception &e) {
+        std::cerr << "Exception during getBMP: " << e.what() << std::endl;
+        throw; // Re-throw the exception to be caught in setup
+    }
+}
+
+
+
 void drawFloor() {
     float floorSize = 10.0f; // Size of the floor (adjust as needed)
     float tileSize = 0.5f;   // Size of each tile (adjust as needed)
@@ -573,20 +595,75 @@ void drawFloor() {
     }
     glEnd();
 }
-void drawTexturedTree()
-{
-    // Draw the textured tree to the left of the building
+
+void drawParkingSign() {
     glPushMatrix();
-    glTranslatef(-1.2f, -1.0f, 0.0f);  // Adjust the position as needed
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
+
+    // Adjust position: move to the left and slightly adjust other coordinates
+    glTranslatef(-0.5f, -0.95f, 0.8f);  // Moved left, slightly down, and closer
+
+    // Reduce the scale to make the sign smaller
+    glScalef(0.15f, 0.15f, 0.15f);
+
+    // Slightly adjust rotation for better visibility
+    glRotatef(-15.0f, 0.0f, 1.0f, 0.0f);
+
+    // Draw the pole
+    glColor3f(0.5f, 0.5f, 0.5f);  // Gray color for the pole
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(-0.25f, 0.0f, 0.0f);  // Scale down by half
-    glTexCoord2f(1.0, 0.0); glVertex3f(0.25f, 0.0f, 0.0f);   // Scale down by half
-    glTexCoord2f(1.0, 1.0); glVertex3f(0.25f, 0.5f, 0.0f);   // Scale down by half
-    glTexCoord2f(0.0, 1.0); glVertex3f(-0.25f, 0.5f, 0.0f);  // Scale down by half
+    glVertex3f(-0.05f, -1.0f, 0.0f);  // Bottom-left
+    glVertex3f(0.05f, -1.0f, 0.0f);   // Bottom-right
+    glVertex3f(0.05f, 1.0f, 0.0f);    // Top-right
+    glVertex3f(-0.05f, 1.0f, 0.0f);   // Top-left
     glEnd();
+
+    // Draw the sign
+    glColor3f(1.0f, 1.0f, 1.0f);  // White color for the sign
+    glBegin(GL_QUADS);
+    glVertex3f(-0.5f, 1.0f, 0.0f);  // Bottom-left
+    glVertex3f(0.5f, 1.0f, 0.0f);   // Bottom-right
+    glVertex3f(0.5f, 1.5f, 0.0f);   // Top-right
+    glVertex3f(-0.5f, 1.5f, 0.0f);  // Top-left
+    glEnd();
+
     glPopMatrix();
 }
+
+void drawSecondSign() {
+    glPushMatrix();
+
+    // Adjust position: move to the left and slightly adjust other coordinates
+    glTranslatef(0.5f, -0.95f, 0.8f);  // Moved left, slightly down, and closer
+
+    // Reduce the scale to make the sign smaller
+    glScalef(0.15f, 0.15f, 0.15f);
+
+    // Slightly adjust rotation for better visibility
+    glRotatef(-15.0f, 0.0f, 1.0f, 0.0f);
+
+    // Draw the pole
+    glColor3f(0.5f, 0.5f, 0.5f);  // Gray color for the pole
+    glBegin(GL_QUADS);
+    glVertex3f(-0.05f, -1.0f, 0.0f);  // Bottom-left
+    glVertex3f(0.05f, -1.0f, 0.0f);   // Bottom-right
+    glVertex3f(0.05f, 1.0f, 0.0f);    // Top-right
+    glVertex3f(-0.05f, 1.0f, 0.0f);   // Top-left
+    glEnd();
+
+    // Draw the sign
+    glColor3f(1.0f, 1.0f, 1.0f);  // White color for the sign
+    glBegin(GL_QUADS);
+    glVertex3f(-0.5f, 1.0f, 0.0f);  // Bottom-left
+    glVertex3f(0.5f, 1.0f, 0.0f);   // Bottom-right
+    glVertex3f(0.5f, 1.5f, 0.0f);   // Top-right
+    glVertex3f(-0.5f, 1.5f, 0.0f);  // Top-left
+    glEnd();
+
+    glPopMatrix();
+}
+
+
+
 
 // Display callback function
 void display() {
@@ -619,22 +696,24 @@ void display() {
     // Draw Floor
     drawFloor();
 
-    // Draw Trees
-    //drawTree();
 
     // Draw the building (light gray background)
     drawBuilding();
 
-    // Draw all the windows in a 5x3 matrix
-    drawAllWindows();
-    // Draw the textured tree to the left of the building
+    // Draw the textured tree
     drawTexturedTree();
 
+    // Draw all the windows in a 5x3 matrix
+    drawAllWindows();
+
+    // Draw the parking sign
+    drawParkingSign();
+
+    // Draw the second sign
+    drawSecondSign();
 
     glutSwapBuffers();
 }
-
-
 
 // Keyboard callback function for special keys (arrow keys)
 void specialKeys(int key, int x, int y) {
@@ -676,13 +755,15 @@ void init() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
     // Load textures
     loadExternalTextures();
-
     // Enable texturing
     glEnable(GL_TEXTURE_2D);
+
+
+
 }
+
 // Main function
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
