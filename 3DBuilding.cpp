@@ -4,12 +4,24 @@
 #else
 #include <GL/glut.h>
 #endif
+#ifndef CUSTOM_OBJ_LOADER_H
+#define CUSTOM_OBJ_LOADER_H
 
-#include <iostream> 
-#include "getBMP.h"
 
-
+#include <vector>
+#include <string>
 #include <cmath> // For trigonometric functions
+#include <fstream>
+#include <sstream>
+#include <iostream>
+#include "custom_obj_loader.h"
+
+// Global variables to store the OBJ data
+std::vector<float> obj_vertices;
+std::vector<float> obj_normals;
+std::vector<unsigned int> obj_indices;
+
+
 
 // Adjusted window size and layout for the 5x3 matrix
 const int windowRows = 5;  // 5 rows
@@ -33,8 +45,8 @@ unsigned int texture[1]; // Array of texture indices.
 
 
 // Function to draw a window with dividers and an outline for depth
-void drawWindow(float x, float y, float width, float height) {
-    float z = 0.01f; // Slightly in front of the building front face to avoid z-fighting
+void drawWindow(float x, float y, float z, float width, float height) {
+    // Remove the line: float z = 0.01f; // z is now a parameter
 
     // Draw the outline to indicate depth (slightly larger than the window)
     glLineWidth(1.0f);
@@ -85,7 +97,7 @@ void drawWindow(float x, float y, float width, float height) {
 
     glEnd();
 
-    // Draw window dividers
+    // Draw window divider (center line)
     glLineWidth(1.5f);
     glColor3f(1.0f, 1.0f, 1.0f); // Pure white
     glBegin(GL_LINES);
@@ -104,6 +116,7 @@ void drawWindow(float x, float y, float width, float height) {
     glEnd();
 }
 
+
 // Function to draw all windows on the building
 void drawAllWindows() {
     // Iterate through the 5x3 matrix of windows
@@ -111,7 +124,8 @@ void drawAllWindows() {
         float startY = 0.60f - row * (windowHeight + windowSpacingY);
         for (int col = 0; col < windowCols; ++col) {
             float startX = -0.35f + col * (windowWidth + windowSpacingX);
-            drawWindow(startX, startY, windowWidth, windowHeight);
+            // Example in drawAllWindows()
+            drawWindow(startX, startY, 0.01f, windowWidth, windowHeight);
         }
     }
 }
@@ -242,6 +256,7 @@ void drawBuilding() {
         glVertex3f(right, bottom, front);
         glVertex3f(left, bottom, front);
     glEnd();
+
 
     // Draw the dark blue square on the front face
     glColor3f(0.1f, 0.2f, 0.4f); // Dark blue for square
@@ -428,13 +443,13 @@ void drawPillars() {
     glEnd();
 
 
-
-    // Draw windows on the right pillar
-    for (int row = 0; row < windowRows; ++row) {
+     // Draw all windows on the right pillar
+     for (int row = 0; row < windowRows; ++row) {
         float startY = 0.60f - row * (windowHeight + windowSpacingY);
         for (int col = 0; col < 2; ++col) {
-            float startX = 0.68f + col * (windowWidth + 0.05);
-            drawWindow(startX, startY, windowWidth, windowHeight);
+            float startX = 0.68f + col * (windowWidth + 0.05f);
+            float z = front + 0.001f; // Slightly in front of the front face to avoid z-fighting
+            drawWindow(startX, startY, z, windowWidth, windowHeight);
         }
     }
 
@@ -442,7 +457,8 @@ void drawPillars() {
     for (int row = 0; row < windowRows; ++row) {
         float startY = 0.60f - row * (windowHeight + windowSpacingY);
         float startX = -0.75f;
-        drawWindow(startX, startY, windowWidth, windowHeight);
+        float z = front + 0.001f; // Slightly in front of the front face to avoid z-fighting
+        drawWindow(startX, startY, z, windowWidth, windowHeight);
     }
 }
 
@@ -524,56 +540,6 @@ void drawBrickWall() {
         glVertex3f(wall_left, wall_top, -0.12f); // top-left
     glEnd();
 }
-
-void drawTexturedTree()
-{
-    // Draw the textured tree to the left of the building
-    glPushMatrix();
-    glTranslatef(-1.2f, -1.0f, 0.0f);  // Adjust the position as needed
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0); glVertex3f(-0.25f, 0.0f, 0.0f);  // Scale down by half
-    glTexCoord2f(1.0, 0.0); glVertex3f(0.25f, 0.0f, 0.0f);   // Scale down by half
-    glTexCoord2f(1.0, 1.0); glVertex3f(0.25f, 0.5f, 0.0f);   // Scale down by half
-    glTexCoord2f(0.0, 1.0); glVertex3f(-0.25f, 0.5f, 0.0f);  // Scale down by half
-    glEnd();
-    glPopMatrix();
-}
-
-void loadExternalTextures()
-{
-    std::cout << "Loading texture..." << std::endl;
-    try {
-        imageFile *image = getBMP("tree-cropped.bmp");
-        if (!image) {
-            throw std::runtime_error("Failed to load BMP file: trees.bmp");
-        }
-
-
-        // Generate texture ID
-        glGenTextures(1, texture);
-        glBindTexture(GL_TEXTURE_2D, texture[0]);
-
-        // Load texture data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width, image->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image->data);
-
-        // Set texture parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-        std::cout << "Texture loaded." << std::endl;
-
-        // Clean up
-        delete[] image->data;
-        delete image;
-    } catch (const std::exception &e) {
-        std::cerr << "Exception during getBMP: " << e.what() << std::endl;
-        throw; // Re-throw the exception to be caught in setup
-    }
-}
-
 
 
 void drawFloor() {
@@ -663,7 +629,160 @@ void drawSecondSign() {
 }
 
 
+// Keyboard callback function for special keys (arrow keys)
+void specialKeys(int key, int x, int y) {
+    const float moveSpeed = 0.1f;    // Camera movement speed
+    const float angleSpeed = 5.0f;   // Camera rotation speed (degrees)
 
+    switch (key) {
+        case GLUT_KEY_UP:
+            // Move forward
+            cameraX += moveSpeed * sinf(cameraAngleY * M_PI / 180.0f);
+            cameraZ += moveSpeed * -cosf(cameraAngleY * M_PI / 180.0f);
+            break;
+        case GLUT_KEY_DOWN:
+            // Move backward
+            cameraX -= moveSpeed * sinf(cameraAngleY * M_PI / 180.0f);
+            cameraZ -= moveSpeed * -cosf(cameraAngleY * M_PI / 180.0f);
+            break;
+        case GLUT_KEY_LEFT:
+            // Rotate left
+            cameraAngleY -= angleSpeed;
+            break;
+        case GLUT_KEY_RIGHT:
+            // Rotate right
+            cameraAngleY += angleSpeed;
+            break;
+    }
+
+    glutPostRedisplay(); // Request display update
+}
+
+
+bool loadOBJ(const char* path, std::vector<float>& vertices, std::vector<float>& normals) {
+    std::ifstream file(path);
+    if (!file.is_open()) {
+        std::cout << "Failed to open OBJ file: " << path << std::endl;
+        return false;
+    }
+
+    std::vector<float> temp_vertices;
+    std::vector<float> temp_normals;
+    std::vector<unsigned int> vertexIndices, normalIndices;
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::istringstream s(line);
+        std::string word;
+        s >> word;
+
+        if (word == "v") {
+            float x, y, z;
+            s >> x >> y >> z;
+            temp_vertices.push_back(x);
+            temp_vertices.push_back(y);
+            temp_vertices.push_back(z);
+        }
+        else if (word == "vn") {
+            float x, y, z;
+            s >> x >> y >> z;
+            temp_normals.push_back(x);
+            temp_normals.push_back(y);
+            temp_normals.push_back(z);
+        }
+        else if (word == "f") {
+            std::string vertexStr;
+            while (s >> vertexStr) {
+                unsigned int vertexIndex = 0, normalIndex = 0;
+                size_t firstSlash = vertexStr.find('/');
+                size_t secondSlash = vertexStr.find('/', firstSlash + 1);
+
+                if (firstSlash == std::string::npos) {
+                    // Only vertex index
+                    vertexIndex = std::stoi(vertexStr);
+                } else if (secondSlash == std::string::npos || firstSlash == secondSlash) {
+                    // Format: v//vn (no texture coordinate)
+                    vertexIndex = std::stoi(vertexStr.substr(0, firstSlash));
+                    normalIndex = std::stoi(vertexStr.substr(firstSlash + 2));
+                } else {
+                    // Format: v/vt/vn
+                    vertexIndex = std::stoi(vertexStr.substr(0, firstSlash));
+                    normalIndex = std::stoi(vertexStr.substr(secondSlash + 1));
+                }
+
+                if (vertexIndex > 0 && vertexIndex <= temp_vertices.size() / 3) {
+                    vertexIndices.push_back(vertexIndex - 1);
+                }
+
+                if (normalIndex > 0 && normalIndex <= temp_normals.size() / 3) {
+                    normalIndices.push_back(normalIndex - 1);
+                }
+            }
+        }
+    }
+
+    // Assemble the vertex and normal arrays
+    for (size_t i = 0; i < vertexIndices.size(); ++i) {
+        unsigned int vertexIndex = vertexIndices[i];
+        unsigned int normalIndex = normalIndices[i];
+
+        vertices.push_back(temp_vertices[vertexIndex * 3]);
+        vertices.push_back(temp_vertices[vertexIndex * 3 + 1]);
+        vertices.push_back(temp_vertices[vertexIndex * 3 + 2]);
+
+        normals.push_back(temp_normals[normalIndex * 3]);
+        normals.push_back(temp_normals[normalIndex * 3 + 1]);
+        normals.push_back(temp_normals[normalIndex * 3 + 2]);
+    }
+
+    return true;
+}
+
+
+void drawOBJ(const std::vector<float>& vertices, const std::vector<float>& normals) {
+    glEnable(GL_DEPTH_TEST);
+
+    glBegin(GL_TRIANGLES);
+    for (size_t i = 0; i < vertices.size(); i += 9) {
+        // Assuming the first half of the vertices are for the trunk and the second half are for the leaves
+        if (i < vertices.size() / 2) {
+            // Set color for the trunk (brown)
+            glColor3f(0.55f, 0.27f, 0.07f);
+        } else {
+            // Set color for the leaves (green)
+            glColor3f(0.0f, 0.5f, 0.0f);
+        }
+
+        // Draw the triangle
+        glNormal3f(normals[i], normals[i + 1], normals[i + 2]);
+        glVertex3f(vertices[i], vertices[i + 1], vertices[i + 2]);
+
+        glNormal3f(normals[i + 3], normals[i + 4], normals[i + 5]);
+        glVertex3f(vertices[i + 3], vertices[i + 4], vertices[i + 5]);
+
+        glNormal3f(normals[i + 6], normals[i + 7], normals[i + 8]);
+        glVertex3f(vertices[i + 6], vertices[i + 7], vertices[i + 8]);
+    }
+    glEnd();
+}
+
+void drawHazelnut() {
+    glPushMatrix();
+
+    // Set the color to green
+    glColor3f(0.0f, 0.5f, 0.0f);  
+
+    // Move the object to the left
+    glTranslatef(-1.2f, -1.0f, 0.0f); // Adjust position as needed
+
+    // Scale the object to half its size
+    glScalef(0.05f, 0.05f, 0.05f);     // Scale down the object as needed
+
+    // Draw the OBJ model
+    drawOBJ(obj_vertices, obj_normals);
+
+    glPopMatrix();
+}
 
 // Display callback function
 void display() {
@@ -700,9 +819,6 @@ void display() {
     // Draw the building (light gray background)
     drawBuilding();
 
-    // Draw the textured tree
-    drawTexturedTree();
-
     // Draw all the windows in a 5x3 matrix
     drawAllWindows();
 
@@ -712,36 +828,10 @@ void display() {
     // Draw the second sign
     drawSecondSign();
 
+    // Create hazelnut
+    drawHazelnut();
+    
     glutSwapBuffers();
-}
-
-// Keyboard callback function for special keys (arrow keys)
-void specialKeys(int key, int x, int y) {
-    const float moveSpeed = 0.1f;    // Camera movement speed
-    const float angleSpeed = 5.0f;   // Camera rotation speed (degrees)
-
-    switch (key) {
-        case GLUT_KEY_UP:
-            // Move forward
-            cameraX += moveSpeed * sinf(cameraAngleY * M_PI / 180.0f);
-            cameraZ += moveSpeed * -cosf(cameraAngleY * M_PI / 180.0f);
-            break;
-        case GLUT_KEY_DOWN:
-            // Move backward
-            cameraX -= moveSpeed * sinf(cameraAngleY * M_PI / 180.0f);
-            cameraZ -= moveSpeed * -cosf(cameraAngleY * M_PI / 180.0f);
-            break;
-        case GLUT_KEY_LEFT:
-            // Rotate left
-            cameraAngleY -= angleSpeed;
-            break;
-        case GLUT_KEY_RIGHT:
-            // Rotate right
-            cameraAngleY += angleSpeed;
-            break;
-    }
-
-    glutPostRedisplay(); // Request display update
 }
 
 // OpenGL initialization
@@ -755,13 +845,6 @@ void init() {
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    // Load textures
-    loadExternalTextures();
-    // Enable texturing
-    glEnable(GL_TEXTURE_2D);
-
-
-
 }
 
 // Main function
@@ -774,6 +857,16 @@ int main(int argc, char** argv) {
     // Initialize OpenGL settings
     init();
 
+    // Load the OBJ file
+    if (!loadOBJ("Hazelnut.obj", obj_vertices, obj_normals)) {
+        std::cout << "Failed to load OBJ file" << std::endl;
+        return -1;
+    }
+
+    // Debug: Print the number of loaded vertices and normals
+    std::cout << "Loaded vertices: " << obj_vertices.size() / 3 << std::endl;
+    std::cout << "Loaded normals: " << obj_normals.size() / 3 << std::endl;
+
     // Set the display callback function
     glutDisplayFunc(display);
 
@@ -784,3 +877,5 @@ int main(int argc, char** argv) {
     glutMainLoop();
     return 0;
 }
+
+#endif  // End of the #ifndef
